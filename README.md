@@ -144,7 +144,7 @@ Este proyecto está bajo licencia MIT. Ver archivo `LICENSE` para detalles.
 
 ## 👤 Autor
 
-**Luis Valencia**
+**Luis Alberto Valencia Pérez**
 - GitHub: [@LuisValencia4k](https://github.com/LuisValencia4k)
 
 ## ⚠️ Disclaimer
