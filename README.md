@@ -21,8 +21,7 @@ Este proyecto implementa un motor computacional especializado para el análisis 
 
 - Python 3.8+
 - NumPy
-- SciPy
-- [Especificar otras dependencias clave]
+- Matplotlib
 
 ### Instalación
 
