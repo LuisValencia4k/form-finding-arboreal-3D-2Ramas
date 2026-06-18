@@ -1,126 +1,77 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20706928.svg)](https://doi.org/10.5281/zenodo.20706928)
-# Form-Finding Arboreal 3D con 2 Ramas
+# Form-Finding Funicular de Estructuras Arbóreas 3D — 2 Ramas
+Motor computacional para el form-finding funicular de estructuras arbóreas tridimensionales con dos ramas, desarrollado como implementación de referencia del artículo:
 
-> Motor de análisis estructural para optimización de geometría de estructuras arbóreas tridimensionales mediante form-finding funicular y métodos de elementos finitos.
+> Valencia Pérez, L. A. (2026). *Form-Finding Funicular de Estructuras Arbóreas Tridimensionales Mediante Relajación Angular Dinámica*. Zenodo. https://doi.org/10.5281/zenodo.20706928
 
-## 📋 Descripción
+---
 
-Este proyecto implementa un motor computacional especializado para el análisis y optimización de estructuras arbóreas 3D con dos ramas principales. Combina técnicas avanzadas de form-finding funicular con análisis de elementos finitos para determinar geometrías óptimas que minimizan deformaciones y tensiones bajo cargas gravitacionales.
+## Descripción
 
-### Características principales
+El repositorio contiene un único script monolítico (`Col_funic_2ramas.py`) que implementa:
 
-- **Form-Finding Funicular**: Optimización de geometría basada en principios de funiculares para estructuras arbóreas
-- **FEM de Vigas Timoshenko**: Análisis preciso considerando deformación por cortante
-- **Relajación Angular Dinámica**: Algoritmo iterativo para convergencia geométrica
-- **Análisis Espectral**: Determinación de frecuencias naturales y modos de vibración
-- **Verificación Estructural**: Validación de estados límite según normativas
-- **Visualización 3D**: Representación interactiva de geometrías y resultados
+- **FEM de vigas Timoshenko** con 6 GDL por nodo, ensamble de rigidez global y condiciones de borde por empotramiento o articulación
+- **Relajación Angular Dinámica (RAD)** para minimizar el residuo ortogonal $T_\text{res} = \|G(\boldsymbol{\alpha})\|$ ajustando los ángulos de elevación de las ramas
+- **Jacobiano analítico** de $G$ respecto a los ángulos, utilizado para la descomposición ortogonal $G = T_\text{geo} + T_\text{hiper}$ mediante la Alternativa de Fredholm
+- **Análisis espectral** del Jacobiano: valores singulares, número de condición $\kappa$ y rango estructural
+- **Verificación MCFT** (Modified Compression Field Theory) de la fuerza de hendimiento en el nodo de bifurcación
+- **Visualización 3D** de la morfología final y topografía del funcional $\Phi$ en el espacio de ángulos
 
-## 🚀 Inicio Rápido
+El fundamento teórico completo — incluyendo la demostración de $G \in C^1(\mathcal{A})$, el Teorema de Condición Necesaria de Funicularidad y el Principio de Funicularidad Ortogonal — se desarrolla en el artículo complementario (en preparación).
 
-### Requisitos previos
+---
 
-- Python 3.8+
-- NumPy
-- Matplotlib
+## Requisitos
 
-### Instalación
+```
+Python >= 3.8
+numpy
+matplotlib
+```
+
+## Uso
+
+El script está diseñado para ejecutarse directamente. Los parámetros geométricos, materiales y de carga se configuran en el bloque `if __name__ == '__main__'` al final del archivo:
 
 ```bash
-git clone https://github.com/LuisValencia4k/form-finding-arboreal-3D-2Ramas.git
-cd form-finding-arboreal-3D-2Ramas
-pip install -r requirements.txt
+python Col_funic_2ramas.py
 ```
 
-### Uso básico
+Los parámetros principales que el usuario puede modificar son:
 
-```python
-from arboreal_form_finding import TreeStructure
+| Parámetro | Descripción |
+|---|---|
+| `P1`, `P2` | Cargas verticales en los nodos superiores (kN) |
+| `alpha1_0`, `alpha2_0` | Ángulos de elevación iniciales (°) |
+| `L_xy_1`, `L_xy_2` | Proyecciones horizontales de las ramas (m) |
+| `b`, `h` | Sección transversal de las ramas (m) |
+| `E`, `G` | Módulo elástico y de cortante (kN/m²) |
+| `omega_max`, `omega_min`, `lam` | Parámetros de la relajación angular dinámica |
 
-# Crear estructura arbórea
-tree = TreeStructure(
-    num_branches=2,
-    branch_length=10.0,
-    material='steel'
-)
+---
 
-# Ejecutar análisis de form-finding
-tree.optimize_geometry()
+## Salidas
 
-# Obtener resultados
-results = tree.get_analysis_results()
-tree.visualize()
-```
+Al ejecutarse, el script produce:
 
-## 📚 Documentación
+- Convergencia de $T_\text{res}$ por iteración (gráfica semilogarítmica)
+- Morfología arbórea 3D en el punto estacionario
+- Descomposición $T_\text{geo}$ / $T_\text{hiper}$ con valores numéricos
+- Espectro singular del Jacobiano y número de condición $\kappa$
+- Topografía del funcional $\Phi(\alpha_1, \alpha_2)$ con trayectoria dinámica
+- Resumen de verificación MCFT
 
-### Conceptos teóricos
+---
 
-- **Form-Finding Funicular**: Encuentra formas donde la estructura trabajaría únicamente en tracción/compresión axial
-- **Timoshenko Beam Theory**: Incluye efectos de deformación por cortante, más preciso para vigas cortas y robustas
-- **Relajación Angular Dinámica**: Método iterativo que ajusta ángulos en nodos para minimizar energía de deformación
+## Contexto teórico
 
-### Estructura del código
+La geometría óptima $\boldsymbol{\alpha}^*$ minimiza el funcional:
 
-```
-form-finding-arboreal-3D-2Ramas/
-├── src/
-│   ├── core/              # Núcleo del motor
-│   ├── fem/               # Módulo de elementos finitos
-│   ├── optimization/      # Algoritmos de optimización
-│   └── utils/             # Utilidades
-├── tests/                 # Suite de pruebas
-├── examples/              # Ejemplos de uso
-├── docs/                  # Documentación técnica
-└── requirements.txt       # Dependencias
-```
+$$\Phi(\boldsymbol{\alpha}) = \tfrac{1}{2}\|G(\boldsymbol{\alpha})\|^2$$
 
-## 🔧 Configuración
+donde $G(\boldsymbol{\alpha}) = \sum_k (\mathbf{I} - \mathbf{u}_k \mathbf{u}_k^\top)\mathbf{F}_k$ es la suma de las fuerzas internas proyectadas ortogonalmente al eje de cada rama. En el punto estacionario, la componente $T_\text{geo}$ se anula y el residuo residual $T_\text{hiper}$ es irreducible por variaciones angulares — consecuencia directa de que $J_G \in \mathbb{R}^{3 \times 2}$ tiene rango a lo más 2.
 
-### Parámetros principales
-
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| `num_branches` | int | Número de ramas (fijo en 2) |
-| `branch_length` | float | Longitud de ramas en metros |
-| `material` | str | Material estructural |
-| `max_iterations` | int | Iteraciones máximas de optimización |
-| `tolerance` | float | Tolerancia de convergencia |
-
-## 📊 Resultados y Análisis
-
-El proyecto genera múltiples tipos de análisis:
-
-- **Análisis geométrico**: Optimización de coordenadas de nodos
-- **Análisis de esfuerzos**: Distribución de tensiones en elementos
-- **Análisis dinámico**: Modos y frecuencias de vibración
-- **Verificación**: Estados límite de servicio y últimos
-
-## 🧪 Testing
-
-```bash
-# Ejecutar suite completa de pruebas
-pytest tests/
-
-# Con reporte de cobertura
-pytest --cov=src tests/
-```
-
-## 📈 Ejemplos
-
-Consulta la carpeta `examples/` para casos de uso:
-
-- `example_basic_analysis.py`: Análisis básico de estructura de 2 ramas
-- `example_optimization.py`: Optimización completa con verificación
-- `example_visualization.py`: Generación de visualizaciones 3D
-
-## 🔍 Validación
-
-El código incluye verificación contra:
-
-- Equilibrio de fuerzas nodales
-- Cierre de ecuaciones de compatibilidad
-- Cumplimiento de límites de tensión
+---
 
 ## 📖 Referencias
 
